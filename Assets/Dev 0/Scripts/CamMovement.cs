@@ -1,29 +1,87 @@
 using UnityEngine;
 
-
-public class CamMovement : MonoBehaviour
+[RequireComponent(typeof(Rigidbody))]
+public class RigidbodyPlayerController : MonoBehaviour
 {
-    public float MoveSpeed = 7f;
-    public float TurnSpeed = 100f;
+    [Header("Movement Settings")]
+    public float moveSpeed = 6f;
+    public float jumpForce = 5f;
+    public float mouseSensitivity = 2f;
+    public float maxLookX = 80f;
+    public float minLookX = -80f;
+
+    [Header("References")]
+    public Transform cameraTransform;
+
+    private Rigidbody rb;
+    private float rotX;
+    private bool isGrounded;
+
+    void Start()
+    {
+        rb = GetComponent<Rigidbody>();
+        rb.freezeRotation = true; // Prevent physics from rotating the player
+        Cursor.lockState = CursorLockMode.Locked;
+        Cursor.visible = false;
+    }
+
+    void Update()
+    {
+        HandleLook();
+        HandleJump();
+    }
 
     void FixedUpdate()
     {
-        float adMove = Input.GetAxis("Horizontal");
-        float wsMove = Input.GetAxis("Vertical");
+        HandleMovement();
+    }
 
-        // Movement relative to camera direction
-        Vector3 moveDir = (transform.forward * wsMove + transform.right * adMove).normalized;
-        transform.position += moveDir * MoveSpeed * Time.deltaTime;
+    // Mouse look (camera rotation)
+    void HandleLook()
+    {
+        float mouseX = Input.GetAxis("Mouse X") * mouseSensitivity;
+        float mouseY = Input.GetAxis("Mouse Y") * mouseSensitivity;
 
-        // Rotation (yaw)
-        if (Input.GetKey(KeyCode.Q))
+        // Rotate player horizontally
+        transform.Rotate(Vector3.up * mouseX);
+
+        // Rotate camera vertically
+        rotX -= mouseY;
+        rotX = Mathf.Clamp(rotX, minLookX, maxLookX);
+        cameraTransform.localRotation = Quaternion.Euler(rotX, 0, 0);
+    }
+
+    // WASD movement (relative to camera/player)
+    void HandleMovement()
+    {
+        float moveX = Input.GetAxis("Horizontal");
+        float moveZ = Input.GetAxis("Vertical");
+
+        Vector3 moveDir = (transform.forward * moveZ + transform.right * moveX).normalized;
+        Vector3 moveVelocity = moveDir * moveSpeed;
+
+        // Keep existing Y velocity (for gravity / jump)
+        Vector3 newVelocity = new Vector3(moveVelocity.x, rb.linearVelocity.y, moveVelocity.z);
+        rb.linearVelocity = newVelocity;
+    }
+
+    // Optional jump
+    void HandleJump()
+    {
+        if (Input.GetButtonDown("Jump") && isGrounded)
         {
-            transform.Rotate(Vector3.up, -TurnSpeed * Time.deltaTime);
+            rb.AddForce(Vector3.up * jumpForce, ForceMode.Impulse);
         }
+    }
 
-        if (Input.GetKey(KeyCode.E))
-        {
-            transform.Rotate(Vector3.up, TurnSpeed * Time.deltaTime);
-        }
+    // Ground check
+    void OnCollisionStay(Collision collision)
+    {
+        isGrounded = true;
+    }
+
+    void OnCollisionExit(Collision collision)
+    {
+        isGrounded = false;
     }
 }
