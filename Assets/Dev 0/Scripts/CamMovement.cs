@@ -159,7 +159,7 @@ public class RigidbodyPlayerController : MonoBehaviour
         slideDir.y = 0f;
         slideDir.Normalize();
 
-        rb.linearDamping = 2f;
+        rb.linearDamping = 1f;
         rb.AddForce(slideDir * slideForce, ForceMode.VelocityChange);
     }
 
@@ -210,7 +210,7 @@ public class RigidbodyPlayerController : MonoBehaviour
         float groundAcceleration = 18f;
         float airAcceleration = 10f;
         float groundDrag = 8f;
-        float glideDrag = 2f;
+        float glideDrag = 0.1f;
         float airControl = 0.7f;
         float maxSpeed = moveSpeed;
 
@@ -253,8 +253,8 @@ public class RigidbodyPlayerController : MonoBehaviour
     Vector3 GetWallAdjustedMovement(Vector3 inputDir)
     {
         Vector3 origin = transform.position;
-        float checkDistance = 0.6f;
-        float capsuleRadius = 0.4f;
+        float checkDistance = 0.46f;
+        float capsuleRadius = 0.45f;
 
         RaycastHit hit;
         
@@ -279,7 +279,15 @@ public class RigidbodyPlayerController : MonoBehaviour
     {
         if (Input.GetButton("Jump") && isGrounded)
         {
-            rb.AddForce(Vector3.up * jumpForce, ForceMode.Impulse);
+            float mult = 1f;
+            // if (isSliding)
+            // {
+            //     EndSlide();
+            //     mult = -1f;
+            //     PlayerTransform.position += Vector3.up * 0.55f;
+            // }
+
+            rb.AddForce(Vector3.up * jumpForce * mult, ForceMode.Impulse);
             isGrounded = false;
         }
         else if (Input.GetButtonDown("Jump"))
@@ -391,6 +399,7 @@ System.Collections.IEnumerator VaultOverObstacle(Vector3 targetPoint, float dist
             if (Vector3.Angle(contact.normal, Vector3.up) < 45f)
             {
                 isGrounded = true;
+                rb.linearDamping = 2f;
                 break;
             }
         }
@@ -399,5 +408,6 @@ System.Collections.IEnumerator VaultOverObstacle(Vector3 targetPoint, float dist
     void OnCollisionExit(Collision collision)
     {
         isGrounded = false;
+        rb.linearDamping = 0f;
     }
 }
