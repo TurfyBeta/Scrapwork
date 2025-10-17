@@ -81,7 +81,7 @@ public class RigidbodyPlayerController : MonoBehaviour
         HandleLook();
         HandleSlideInput();
 
-        if (!isVaulting && !isSliding)
+        if (!isVaulting && !isSliding && Time.time >= lastSlideTime + slideCooldown)
         {
             HandleJump();
         }
@@ -159,7 +159,7 @@ public class RigidbodyPlayerController : MonoBehaviour
         slideDir.y = 0f;
         slideDir.Normalize();
 
-        rb.linearDamping = 1f;
+        rb.linearDamping = 20f;
         rb.AddForce(slideDir * slideForce, ForceMode.VelocityChange);
     }
 
@@ -258,7 +258,7 @@ public class RigidbodyPlayerController : MonoBehaviour
 
         RaycastHit hit;
         
-        if (Physics.SphereCast(origin, capsuleRadius, inputDir, out hit, checkDistance))
+        if (Physics.SphereCast(origin, capsuleRadius, inputDir, out hit, checkDistance, climbableMask))
         {
             float angle = Vector3.Angle(-hit.normal, inputDir);
             
