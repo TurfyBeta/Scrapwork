@@ -89,7 +89,7 @@ public class RigidbodyPlayerController : MonoBehaviour
         if (isSliding)
         {
             slideTimer -= Time.deltaTime;
-            if (slideTimer <= 0f)
+            if (slideTimer <= 0f && isGrounded)
             {
                 EndSlide();
             }
@@ -126,7 +126,7 @@ public class RigidbodyPlayerController : MonoBehaviour
     void HandleSlideInput()
     {
         if (Input.GetKeyDown(KeyCode.LeftControl) && Time.time >= lastSlideTime + slideCooldown 
-            && !isSliding && !isVaulting && isGrounded)
+            && !isSliding && !isVaulting)
         {
             StartSlide();
         }
@@ -156,10 +156,10 @@ public class RigidbodyPlayerController : MonoBehaviour
         }
 
         Vector3 slideDir = PlayerTransform.forward;
-        slideDir.y = 0f;
+        slideDir.y = 1f;
         slideDir.Normalize();
 
-        rb.linearDamping = 20f;
+        rb.linearDamping = 1.2f;
         rb.AddForce(slideDir * slideForce, ForceMode.VelocityChange);
     }
 

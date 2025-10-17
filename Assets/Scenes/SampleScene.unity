@@ -669,7 +669,7 @@ Camera:
     height: 1
   near clip plane: 0.3
   far clip plane: 1000
-  field of view: 60
+  field of view: 75
   orthographic: 0
   orthographic size: 5
   m_Depth: -1
@@ -1775,9 +1775,9 @@ MonoBehaviour:
     m_Bits: 55
   gravityScale: 1.2
   useCustomGravity: 1
-  slideForce: 18
-  slideDuration: 1.7
-  slideCooldown: 1.8
+  slideForce: 9
+  slideDuration: 2
+  slideCooldown: 2.1
   slideHeightScale: 0.5
   mouseSensitivity: 2
   maxLookX: 80
@@ -2707,7 +2707,8 @@ MonoBehaviour:
   moveSpeed: 10
   rotationSpeed: 60
   mouseSensitivity: 3
-  cockpitLagSpeed: 6
+  cockpitFollowSpeed: 5
+  mechFollowSpeed: 2
   returnLookSpeed: 4
   pitchLimit: 80
   mechCamera: {fileID: 1422877303}
