@@ -156,7 +156,7 @@ public class RigidbodyPlayerController : MonoBehaviour
         }
 
         Vector3 slideDir = PlayerTransform.forward;
-        slideDir.y = 1f;
+        slideDir.y = isGrounded ? 0f : 1f;
         slideDir.Normalize();
 
         rb.linearDamping = 1.2f;

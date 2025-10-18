@@ -116,7 +116,7 @@ public class MechController : MonoBehaviour
         isReturning = true;
 
         Quaternion startRot = mechCamera.localRotation;
-        Quaternion targetRot = Quaternion.Euler(pitch, 0f, 0f);
+        Quaternion targetRot = Quaternion.Euler(0f, 0f, 0f);
 
         float t = 0f;
         while (t < 1f)
