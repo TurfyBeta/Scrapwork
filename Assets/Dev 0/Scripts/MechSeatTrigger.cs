@@ -1,6 +1,6 @@
 using UnityEngine;
 
-public class MechSeatTrigger : MonoBehaviour
+public class MechSeatTrigger : MonoBehaviour, MechInteractable
 {
     public MechController mechController;
     public Transform playerSeatPosition;
@@ -9,7 +9,7 @@ public class MechSeatTrigger : MonoBehaviour
     public GameObject playerObject;
 
     private bool inRange = false;
-    private bool interactDelay = false;
+    // private bool interactDelay = false;
 
     void Start() 
     {
@@ -19,19 +19,21 @@ public class MechSeatTrigger : MonoBehaviour
 
     void Update()
     {
-        if (!interactDelay && mechController.isControlled && Input.GetKeyDown(KeyCode.E))
-        {
-            ExitMech();
-            interactDelay = true;
-        }
+        // if (!interactDelay && mechController.isControlled && Input.GetKeyDown(KeyCode.E))
+        // {
+        //     ExitMech();
+        //     interactDelay = true;
+        // }
 
-        if (!interactDelay && inRange && Input.GetKeyDown(KeyCode.E))
+        if (inRange && Input.GetKeyDown(KeyCode.E))
         {
             EnterMech();
-            interactDelay = true;
         }
+    }
 
-        interactDelay = false;
+    public void MechInteract(GameObject MCGO) 
+    {
+        ExitMech();
     }
 
     void OnTriggerEnter(Collider other)

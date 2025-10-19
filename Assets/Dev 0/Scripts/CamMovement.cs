@@ -280,12 +280,6 @@ public class RigidbodyPlayerController : MonoBehaviour
         if (Input.GetButton("Jump") && isGrounded)
         {
             float mult = 1f;
-            // if (isSliding)
-            // {
-            //     EndSlide();
-            //     mult = -1f;
-            //     PlayerTransform.position += Vector3.up * 0.55f;
-            // }
 
             rb.AddForce(Vector3.up * jumpForce * mult, ForceMode.Impulse);
             isGrounded = false;

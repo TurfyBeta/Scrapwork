@@ -2,6 +2,10 @@ using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;   
 
+interface MechInteractable {
+    public void MechInteract(GameObject MCGO);
+}
+
 [RequireComponent(typeof(Rigidbody))]
 public class MechController : MonoBehaviour
 {
@@ -13,13 +17,13 @@ public class MechController : MonoBehaviour
     public float mouseSensitivity = 3f;
     public float cockpitFollowSpeed = 5f;   // How quickly the cockpit matches camera yaw
     public float mechFollowSpeed = 2f;      // How quickly the mech matches cockpit yaw
-    public float returnLookSpeed = 4f;      // How fast camera re-centers after free look
     public float pitchLimit = 80f;
 
     [Header("References")]
     public Transform mechCamera;    // The cockpit camera
     public Transform cockpitTransform;
     public GameObject[] spriteRenderers;
+    public LayerMask InteractableObjects;
 
     [Header("State")]
     public bool playerInside = false;
@@ -28,15 +32,13 @@ public class MechController : MonoBehaviour
     private Rigidbody rb;
     private float pitch = 0f;
     private float yaw = 0f;
+    private float yawCockpit = 0f;
     private float cockpitYaw = 0f;
     private float mechYaw = 0f;
-    private bool isFreeLooking = false;
-    private bool isReturning = false;
-    private Quaternion freeLookReturnRot;
-
 
     private Dictionary<string, float> ComponentPower = new Dictionary<string, float>();
     private Dictionary<string, float> AccessoryPower = new Dictionary<string, float>();
+
 
     void Start()
     {
@@ -50,6 +52,7 @@ public class MechController : MonoBehaviour
         if (cockpitTransform != null)
             cockpitTransform.rotation = transform.rotation;
         
+        
         // Variable Setup
         ZeroComponentPower();
         ZeroAccessoryPower();
@@ -57,19 +60,23 @@ public class MechController : MonoBehaviour
 
     void Update()
     {
-        if (isControlled && !isReturning)
-        {
-            HandleLook();
-            if (ComponentPower["chassis"] >= 1)
-            {
-                HandleMovement();
-            }
+        HandleLook();
+        if (ComponentPower["chassis"] >= 1 && isControlled) {
+
+            if (!Input.GetKey(KeyCode.Space)) yawCockpit = yaw;
+
+            HandleMechTurn();
+            HandleMovement();
         }
-        
+
         
         if (Input.GetKeyDown(KeyCode.P))
         {
             SetComponentPower("chassis", 1);
+        }
+        
+        if (Input.GetKeyDown(KeyCode.E)) {
+            Interact();   
         }
     }
 
@@ -79,81 +86,22 @@ public class MechController : MonoBehaviour
         float mouseX = Input.GetAxis("Mouse X") * mouseSensitivity;
         float mouseY = Input.GetAxis("Mouse Y") * mouseSensitivity;
 
-        if (Input.GetKey(KeyCode.Space) || ComponentPower["chassis"]  == 0)
-        {
-            // === FREE LOOK MODE ===
-            if (!isFreeLooking)
-            {
-                isFreeLooking = true;
-                freeLookReturnRot = mechCamera.localRotation;
-            }
+        yaw += mouseX;
+        pitch -= mouseY;
+        pitch = Mathf.Clamp(pitch, -pitchLimit, pitchLimit);
+        
+        mechCamera.rotation = Quaternion.Euler(pitch, yaw, 0f);
 
-            yaw += mouseX;
-            pitch -= mouseY;
-            pitch = Mathf.Clamp(pitch, -pitchLimit, pitchLimit);
-
-            // Camera moves independently
-            mechCamera.localRotation = Quaternion.Euler(pitch, yaw - cockpitYaw, 0f);
-        }
-        else
-        {
-            // === NORMAL CONTROL MODE ===
-            if (isFreeLooking)
-            {
-                // Released free look
-                isFreeLooking = false;
-                StartCoroutine(ReturnCameraForwardAndSnap());
-                return;
-            }
-
-            // Normal movement: camera drives cockpit yaw, cockpit drives mech
-            yaw += mouseX;
-            pitch -= mouseY;
-            pitch = Mathf.Clamp(pitch, -pitchLimit, pitchLimit);
-
-            // Cockpit slowly follows player’s current look yaw
-            cockpitYaw = Mathf.LerpAngle(cockpitYaw, yaw, Time.deltaTime * cockpitFollowSpeed);
-
-            // Mech slowly follows the cockpit’s yaw
-            mechYaw = Mathf.LerpAngle(mechYaw, cockpitYaw, Time.deltaTime * mechFollowSpeed);
-
-            // Apply rotations
-            // cockpitTransform.rotation = Quaternion.Euler(0f, cockpitYaw, 0f);
-            transform.rotation = Quaternion.Euler(0f, mechYaw, 0f);
-
-            cockpitTransform.rotation = transform.rotation;
-
-            // Pitch affects camera only
-            mechCamera.localRotation = Quaternion.Euler(pitch, cockpitYaw - mechYaw, 0f);
-        }
+        
     }
 
-    // === CAMERA RETURN AFTER FREELOOK ===
-    IEnumerator ReturnCameraForwardAndSnap()
+    void HandleMechTurn() 
     {
-        isReturning = true;
+        cockpitYaw = Mathf.LerpAngle(cockpitYaw, yawCockpit, Time.deltaTime * cockpitFollowSpeed);
+        mechYaw = Mathf.LerpAngle(mechYaw, yawCockpit, Time.deltaTime * mechFollowSpeed);
 
-        Quaternion startRot = mechCamera.localRotation;
-        Quaternion targetRot = Quaternion.Euler(0f, 0f, 0f);
-
-        float t = 0f;
-        while (t < 1f)
-        {
-            t += Time.deltaTime * returnLookSpeed;
-            mechCamera.localRotation = Quaternion.Slerp(startRot, targetRot, t);
-            yield return null;
-        }
-
-        mechCamera.localRotation = targetRot;
-
-        // After the camera finishes returning, snap mech to match player view
-        yaw = cockpitYaw = mechCamera.parent.eulerAngles.y;
-        mechYaw = yaw;
-
-        transform.rotation = Quaternion.Euler(0f, yaw, 0f);
+        transform.rotation = Quaternion.Euler(0f, mechYaw, 0f);
         cockpitTransform.rotation = transform.rotation;
-
-        isReturning = false;
     }
 
     // === MOVEMENT ===
@@ -163,20 +111,30 @@ public class MechController : MonoBehaviour
         float v = Input.GetAxis("Vertical");
 
         Vector3 moveDir = transform.forward * v + transform.right * h;
-        rb.MovePosition(rb.position + moveDir * moveSpeed * Time.deltaTime);
+        rb.MovePosition(rb.position + moveDir * moveSpeed * ComponentPower["chassis"] / 1.5f * Time.deltaTime);
+    }
+
+    void Interact() 
+    {
+        Debug.Log("Mech Interact");
+        Ray ray = new Ray(mechCamera.position, mechCamera.forward);
+        if (Physics.Raycast(ray, out RaycastHit hit, 3f, InteractableObjects, QueryTriggerInteraction.Collide)) {
+            if (hit.collider.gameObject.TryGetComponent(out MechInteractable interactObj)) {
+                interactObj.MechInteract(this.gameObject);
+            }
+        }
     }
 
     // === ENTER / EXIT ===
     public void MechEnterExit()
     {
+        Debug.Log("run");
         playerInside = !playerInside;
 
         foreach (GameObject i in spriteRenderers)
             i.SetActive(!playerInside);
     }
-
     
-
     private void ZeroComponentPower()
     {
         ComponentPower = new Dictionary<string, float>() {
@@ -208,4 +166,5 @@ public class MechController : MonoBehaviour
     {
         AccessoryPower[key] = AccessoryPower[key] == value ? 0 : value;
     }
+    
 }
