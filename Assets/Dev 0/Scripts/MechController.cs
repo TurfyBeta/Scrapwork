@@ -1,5 +1,6 @@
 using UnityEngine;
 using System.Collections;
+using System.Collections.Generic;   
 
 [RequireComponent(typeof(Rigidbody))]
 public class MechController : MonoBehaviour
@@ -33,6 +34,10 @@ public class MechController : MonoBehaviour
     private bool isReturning = false;
     private Quaternion freeLookReturnRot;
 
+
+    private Dictionary<string, float> ComponentPower = new Dictionary<string, float>();
+    private Dictionary<string, float> AccessoryPower = new Dictionary<string, float>();
+
     void Start()
     {
         rb = GetComponent<Rigidbody>();
@@ -44,15 +49,28 @@ public class MechController : MonoBehaviour
 
         if (cockpitTransform != null)
             cockpitTransform.rotation = transform.rotation;
+        
+        // Variable Setup
+        ZeroComponentPower();
+        ZeroAccessoryPower();
     }
 
     void Update()
     {
-        if (!isControlled || isReturning)
-            return;
-
-        HandleLook();
-        HandleMovement();
+        if (isControlled && !isReturning)
+        {
+            HandleLook();
+            if (ComponentPower["chassis"] >= 1)
+            {
+                HandleMovement();
+            }
+        }
+        
+        
+        if (Input.GetKeyDown(KeyCode.P))
+        {
+            SetComponentPower("chassis", 1);
+        }
     }
 
     // === MOUSE LOOK HANDLING ===
@@ -61,7 +79,7 @@ public class MechController : MonoBehaviour
         float mouseX = Input.GetAxis("Mouse X") * mouseSensitivity;
         float mouseY = Input.GetAxis("Mouse Y") * mouseSensitivity;
 
-        if (Input.GetKey(KeyCode.Space))
+        if (Input.GetKey(KeyCode.Space) || ComponentPower["chassis"]  == 0)
         {
             // === FREE LOOK MODE ===
             if (!isFreeLooking)
@@ -155,5 +173,39 @@ public class MechController : MonoBehaviour
 
         foreach (GameObject i in spriteRenderers)
             i.SetActive(!playerInside);
+    }
+
+    
+
+    private void ZeroComponentPower()
+    {
+        ComponentPower = new Dictionary<string, float>() {
+            { "chassis", 0f },
+            { "melee", 0f },
+            { "weapon1", 0f },
+            { "weapon2", 0f },
+            { "shield", 0f },
+            { "flack", 0f },
+            { "radar", 0f }
+        };
+    }
+
+    private void ZeroAccessoryPower()
+    {
+        AccessoryPower = new Dictionary<string, float>() {
+            { "blastDoor", 0f },
+            { "cockpitLights", 0f },
+            { "floodLights", 0f }
+        };
+    }
+
+    public void SetComponentPower(string key, float value)
+    {
+        ComponentPower[key] = ComponentPower[key] == value ? 0 : value;
+    }
+    
+    public void SetAccessoryPower(string key, float value)
+    {
+        AccessoryPower[key] = AccessoryPower[key] == value ? 0 : value;
     }
 }

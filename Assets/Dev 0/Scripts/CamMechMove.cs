@@ -1,5 +1,5 @@
 using UnityEngine;
-
+    
 [RequireComponent(typeof(CharacterController))]
 public class CamMechMove : MonoBehaviour
 {
@@ -26,8 +26,10 @@ public class CamMechMove : MonoBehaviour
     private Vector3 velocity;
     private Vector3 currentMoveDir;
 
+
     void Start()
     {
+        // Setup
         controller = GetComponent<CharacterController>();
 
         Cursor.lockState = CursorLockMode.Locked;
@@ -41,6 +43,8 @@ public class CamMechMove : MonoBehaviour
     {
         HandleLook();
         HandleMovement();
+
+
     }
 
     void HandleLook()
@@ -84,4 +88,6 @@ public class CamMechMove : MonoBehaviour
         Vector3 finalMove = currentMoveDir * moveSpeed + new Vector3(0f, velocity.y, 0f);
         controller.Move(finalMove * Time.deltaTime);
     }
+
+
 }
