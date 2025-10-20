@@ -10,13 +10,12 @@ interface MechInteractable {
 public class MechController : MonoBehaviour
 {
     [Header("Movement")]
-    public float moveSpeed = 10f;
+    public float[] moveSpeed;
     public float rotationSpeed = 60f;
 
     [Header("Look Settings")]
     public float mouseSensitivity = 3f;
-    public float cockpitFollowSpeed = 5f;   // How quickly the cockpit matches camera yaw
-    public float mechFollowSpeed = 2f;      // How quickly the mech matches cockpit yaw
+    public float[] mechFollowSpeed;      // How quickly the mech matches cockpit yaw
     public float pitchLimit = 80f;
 
     [Header("References")]
@@ -45,6 +44,8 @@ public class MechController : MonoBehaviour
         rb = GetComponent<Rigidbody>();
         rb.interpolation = RigidbodyInterpolation.Interpolate;
 
+        moveSpeed = new float[]{0f, 8f, 10f, 12f};
+        mechFollowSpeed = new float[]{0f, 1.5f, 2.5f, 4f};
         yaw = transform.eulerAngles.y;
         cockpitYaw = yaw;
         mechYaw = yaw;
@@ -61,6 +62,7 @@ public class MechController : MonoBehaviour
     void Update()
     {
         HandleLook();
+
         if (ComponentPower["chassis"] >= 1 && isControlled) {
 
             if (!Input.GetKey(KeyCode.Space)) yawCockpit = yaw;
@@ -75,7 +77,7 @@ public class MechController : MonoBehaviour
             SetComponentPower("chassis", 1);
         }
         
-        if (Input.GetKeyDown(KeyCode.E)) {
+        if (Input.GetMouseButtonDown(0)) {
             Interact();   
         }
     }
@@ -91,14 +93,11 @@ public class MechController : MonoBehaviour
         pitch = Mathf.Clamp(pitch, -pitchLimit, pitchLimit);
         
         mechCamera.rotation = Quaternion.Euler(pitch, yaw, 0f);
-
-        
     }
 
     void HandleMechTurn() 
     {
-        cockpitYaw = Mathf.LerpAngle(cockpitYaw, yawCockpit, Time.deltaTime * cockpitFollowSpeed);
-        mechYaw = Mathf.LerpAngle(mechYaw, yawCockpit, Time.deltaTime * mechFollowSpeed);
+        mechYaw = Mathf.LerpAngle(mechYaw, yawCockpit, Time.deltaTime * mechFollowSpeed[(int)ComponentPower["chassis"]]);
 
         transform.rotation = Quaternion.Euler(0f, mechYaw, 0f);
         cockpitTransform.rotation = transform.rotation;
@@ -111,7 +110,7 @@ public class MechController : MonoBehaviour
         float v = Input.GetAxis("Vertical");
 
         Vector3 moveDir = transform.forward * v + transform.right * h;
-        rb.MovePosition(rb.position + moveDir * moveSpeed * ComponentPower["chassis"] / 1.5f * Time.deltaTime);
+        rb.MovePosition(rb.position + moveDir * moveSpeed[(int)ComponentPower["chassis"]] * Time.deltaTime);
     }
 
     void Interact() 
@@ -128,7 +127,6 @@ public class MechController : MonoBehaviour
     // === ENTER / EXIT ===
     public void MechEnterExit()
     {
-        Debug.Log("run");
         playerInside = !playerInside;
 
         foreach (GameObject i in spriteRenderers)

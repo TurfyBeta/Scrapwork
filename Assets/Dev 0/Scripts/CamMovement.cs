@@ -197,15 +197,7 @@ public class RigidbodyPlayerController : MonoBehaviour
         float moveX = Input.GetAxis("Horizontal");
         float moveZ = Input.GetAxis("Vertical");
 
-        Vector3 flatForward = PlayerTransform.forward;
-        flatForward.y = 0f;
-        flatForward.Normalize();
-
-        Vector3 flatRight = PlayerTransform.right;
-        flatRight.y = 0f;
-        flatRight.Normalize();
-
-        Vector3 inputDir = (flatForward * moveZ + flatRight * moveX).normalized;
+        Vector3 inputDir = (PlayerTransform.forward * moveZ + PlayerTransform.right * moveX).normalized;
 
         float groundAcceleration = 18f;
         float airAcceleration = 10f;
