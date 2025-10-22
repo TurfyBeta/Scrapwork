@@ -21,8 +21,10 @@ public class MechController : MonoBehaviour
     [Header("References")]
     public Transform mechCamera;    // The cockpit camera
     public Transform cockpitTransform;
+    public Camera[] RTCams;
     public GameObject[] spriteRenderers;
     public LayerMask InteractableObjects;
+    public GameObject bdGO;
 
     [Header("State")]
     public bool playerInside = false;
@@ -76,9 +78,18 @@ public class MechController : MonoBehaviour
         {
             SetComponentPower("chassis", 1);
         }
+
+        if (Input.GetMouseButtonDown(0) && isControlled)
+        {
+            Interact();
+        }
         
-        if (Input.GetMouseButtonDown(0)) {
-            Interact();   
+        if (AccessoryPower["blastDoor"] == 0f)
+        {
+            bdGO.SetActive(false);
+        } else
+        {
+            bdGO.SetActive(true);
         }
     }
 
@@ -127,7 +138,13 @@ public class MechController : MonoBehaviour
     // === ENTER / EXIT ===
     public void MechEnterExit()
     {
+        // Debug.Log(this.gameObject.name);
         playerInside = !playerInside;
+
+        foreach (Camera i in RTCams)
+        {
+            i.enabled = playerInside;
+        }
 
         foreach (GameObject i in spriteRenderers)
             i.SetActive(!playerInside);
