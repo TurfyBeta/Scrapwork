@@ -7,6 +7,7 @@ using UnityEngine.AI;
 public class StewwieAI : MonoBehaviour, IInteractable
 {
     private Transform playerTransform;
+    public Animator anim;
     private NavMeshAgent aiAgent;
     private Rigidbody rb;
 
@@ -51,11 +52,33 @@ public class StewwieAI : MonoBehaviour, IInteractable
         }
     }
 
-    public void Interact(GameObject interactor = null) {
-        if (interactor != null) {
+    public void Interact(GameObject interactor = null)
+    {
+        StartCoroutine(Punch(interactor));
+    }
+
+    private System.Collections.IEnumerator Punch(GameObject interactor)
+    {
+        if (interactor != null)
+        {
+            anim.SetBool("IsPunching", true);
+
+            yield return new WaitForSeconds(0.3f); // ✅ now valid
+
             RigidbodyPlayerController pCode = interactor.GetComponent<RigidbodyPlayerController>();
-            pCode.RagDoll();
-            pCode.GetRB().AddForceAtPosition(transform.forward * 14f, interactor.transform.position + Vector3.up * 0.002f + Vector3.right * Random.Range(-0.005f, 0.005f), ForceMode.Impulse); 
+            if (pCode != null)
+            {
+                pCode.RagDoll();
+                pCode.GetRB().AddForceAtPosition(
+                    transform.forward * 14f,
+                    interactor.transform.position 
+                        + Vector3.up * 0.002f 
+                        + Vector3.right * Random.Range(-0.005f, 0.005f),
+                    ForceMode.Impulse
+                );
+            }
+
+            anim.SetBool("IsPunching", false);
         }
     }
 }

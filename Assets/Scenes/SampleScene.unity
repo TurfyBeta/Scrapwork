@@ -4792,6 +4792,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 62c63708a52d5164b97a00d0f0d4e451, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  anim: {fileID: 629021087}
   lookSmoothness: 2
   stopDistance: 3
 --- !u!195 &843332716
