@@ -24,7 +24,8 @@ public class MechController : MonoBehaviour
     public Camera[] RTCams;
     public GameObject[] spriteRenderers;
     public LayerMask InteractableObjects;
-    public GameObject bdGO;
+    public Animator DSAnimator;
+    public Animator BDAnimator;
 
     [Header("State")]
     public bool playerInside = false;
@@ -86,10 +87,12 @@ public class MechController : MonoBehaviour
         
         if (AccessoryPower["blastDoor"] == 0f)
         {
-            bdGO.SetActive(false);
+            DSAnimator.SetBool("ScreenOpen", true);
+            BDAnimator.SetBool("BDOpen", true);
         } else
         {
-            bdGO.SetActive(true);
+            DSAnimator.SetBool("ScreenOpen", false);
+            BDAnimator.SetBool("BDOpen", false);
         }
     }
 
