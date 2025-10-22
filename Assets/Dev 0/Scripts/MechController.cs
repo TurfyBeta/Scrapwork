@@ -129,7 +129,6 @@ public class MechController : MonoBehaviour
 
     void Interact() 
     {
-        Debug.Log("Mech Interact");
         Ray ray = new Ray(mechCamera.position, mechCamera.forward);
         if (Physics.Raycast(ray, out RaycastHit hit, 3f, InteractableObjects, QueryTriggerInteraction.Collide)) {
             if (hit.collider.gameObject.TryGetComponent(out MechInteractable interactObj)) {
@@ -169,7 +168,7 @@ public class MechController : MonoBehaviour
     private void ZeroAccessoryPower()
     {
         AccessoryPower = new Dictionary<string, float>() {
-            { "blastDoor", 0f },
+            { "blastDoor", 1f },
             { "cockpitLights", 0f },
             { "floodLights", 0f }
         };

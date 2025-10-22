@@ -184,12 +184,16 @@ public class RigidbodyPlayerController : MonoBehaviour
                 originalCenterY,
                 capsuleCollider.center.z
             );
+            
         }
 
         if (cameraTransform != null)
         {
             cameraTransform.localPosition = originalCameraPos;
         }
+        transform.rotation = Quaternion.Euler(0f, transform.eulerAngles.y, 0f);
+        rb.freezeRotation = true;
+        // rb.constraints = RigidbodyConstraints.FreezeRotationX | RigidbodyConstraints.FreezeRotationZ;
     }
 
     void HandleMovement()
@@ -376,6 +380,36 @@ System.Collections.IEnumerator VaultOverObstacle(Vector3 targetPoint, float dist
     isVaulting = false;
 }
 
+    public void RagDoll()
+    {
+        isSliding = true;
+        slideTimer = slideDuration * 2f;
+        lastSlideTime = Time.time;
+
+        if (capsuleCollider != null)
+        {
+            capsuleCollider.height = originalHeight * slideHeightScale;
+            capsuleCollider.center = new Vector3(
+                capsuleCollider.center.x,
+                originalCenterY * slideHeightScale,
+                capsuleCollider.center.z
+            );
+        }
+
+        if (cameraTransform != null)
+        {
+            Vector3 camPos = cameraTransform.localPosition;
+            camPos.y = originalCameraPos.y * slideHeightScale;
+            cameraTransform.localPosition = camPos;
+        }
+
+        rb.linearDamping = 1.2f;
+        rb.freezeRotation = false;
+    }
+
+    public Rigidbody GetRB() {
+        return rb;
+    }
 
     void OnCollisionStay(Collision collision)
     {

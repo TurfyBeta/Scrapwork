@@ -55,6 +55,7 @@ public class MechSeatTrigger : MonoBehaviour, MechInteractable
     void EnterMech()
     {
         Debug.Log("Mech Enter Seat");
+        mechCamera.tag = "MainCamera";
         playerObject.SetActive(false); // Hide player model + disable controller
         playerCamera.enabled = false;
 
@@ -71,6 +72,7 @@ public class MechSeatTrigger : MonoBehaviour, MechInteractable
         playerCamera.enabled = true;
 
         mechCamera.enabled = false;
+        mechCamera.tag = "Untagged";
         mechController.isControlled = false;
     }
 }

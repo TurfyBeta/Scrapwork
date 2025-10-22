@@ -7,7 +7,7 @@ public class SpriteDirCont : MonoBehaviour
     [SerializeField] float backSideAngle = 90f;  // 45°–90° = back-side (45°)
     [SerializeField] float sideAngle = 135f;     // 90°–135° = side
     [SerializeField] float frontSideAngle = 160f;// 135°–160° = front-side (45°)
-    [SerializeField] float frontAngle = 180f;    // beyond = front
+    // [SerializeField] float frontAngle = 180f;    // beyond = front
 
     [Header("References")]
     [SerializeField] Transform mainTrans;
