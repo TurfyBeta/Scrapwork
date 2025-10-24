@@ -26,6 +26,7 @@ public class MechController : MonoBehaviour
     public LayerMask InteractableObjects;
     public Animator DSAnimator;
     public Animator BDAnimator;
+    public LayerMask climbableMask;
 
     [Header("State")]
     public bool playerInside = false;
@@ -46,8 +47,9 @@ public class MechController : MonoBehaviour
     {
         rb = GetComponent<Rigidbody>();
         rb.interpolation = RigidbodyInterpolation.Interpolate;
+        rb.collisionDetectionMode = CollisionDetectionMode.ContinuousDynamic;
 
-        moveSpeed = new float[]{0f, 8f, 10f, 12f};
+        moveSpeed = new float[]{0f, 7.5f, 9f, 12f};
         mechFollowSpeed = new float[]{0f, 1.5f, 2.5f, 4f};
         yaw = transform.eulerAngles.y;
         cockpitYaw = yaw;
@@ -72,12 +74,6 @@ public class MechController : MonoBehaviour
 
             HandleMechTurn();
             HandleMovement();
-        }
-
-        
-        if (Input.GetKeyDown(KeyCode.P))
-        {
-            SetComponentPower("chassis", 1);
         }
 
         if (Input.GetMouseButtonDown(0) && isControlled)
@@ -124,8 +120,40 @@ public class MechController : MonoBehaviour
         float v = Input.GetAxis("Vertical");
 
         Vector3 moveDir = transform.forward * v + transform.right * h;
-        rb.MovePosition(rb.position + moveDir * moveSpeed[(int)ComponentPower["chassis"]] * Time.deltaTime);
+        rb.MovePosition(rb.position + WallMult(moveDir) * moveDir * moveSpeed[(int)ComponentPower["chassis"]] * Time.deltaTime);
     }
+
+private float WallMult(Vector3 desiredMove)
+{
+    if (desiredMove.sqrMagnitude < 0.001f)
+        return 0f;
+
+    // Define mech size (3×3×8)
+    Vector3 halfExtents = new Vector3(1.5f, 4f, 1.5f);
+    Vector3 moveDir = desiredMove.normalized;
+    float moveDistance = desiredMove.magnitude * moveSpeed[(int)ComponentPower["chassis"]] * Time.deltaTime;
+
+    // BoxCast to check for obstacles
+    bool hitWall = Physics.BoxCast(
+        transform.position + transform.forward * -1f,        // start at mech center
+        halfExtents,               // half extents
+        moveDir,                   // move direction
+        out RaycastHit hit,
+        transform.rotation,
+        moveDistance + 1.2f        // small buffer
+    );
+
+    // If we detect a wall, reduce movement speed by half
+    if (hitWall)
+    {
+        Debug.Log("Adj");
+        return 0.2f;
+    }
+    else
+    {
+        return 1f;
+    }
+}
 
     void Interact() 
     {
@@ -184,4 +212,29 @@ public class MechController : MonoBehaviour
         AccessoryPower[key] = AccessoryPower[key] == value ? 0 : value;
     }
     
+    void OnDrawGizmos()
+    {
+        if (!Application.isPlaying) return;
+
+        Vector3 halfExtents = new Vector3(1.5f, 2f, 1.5f);
+        Vector3 moveDir = transform.forward; // visualize forward direction
+        float distance = 5f;
+
+        if (Physics.BoxCast(
+            transform.position,
+            halfExtents,
+            moveDir,
+            out RaycastHit hit,
+            transform.rotation,
+            distance))
+        {
+            Gizmos.color = Color.red;
+            Gizmos.DrawWireCube(hit.point, halfExtents * 2f);
+        }
+        else
+        {
+            Gizmos.color = Color.green;
+            Gizmos.DrawRay(transform.position, moveDir * distance);
+        }
+    }
 }

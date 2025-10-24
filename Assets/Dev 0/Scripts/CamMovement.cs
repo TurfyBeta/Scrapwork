@@ -267,7 +267,7 @@ public class RigidbodyPlayerController : MonoBehaviour
             slideDir.y = 0f;
             return slideDir.normalized;
         }
-
+        
         return inputDir;
     }
 
