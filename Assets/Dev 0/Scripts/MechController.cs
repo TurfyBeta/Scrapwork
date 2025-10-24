@@ -27,6 +27,7 @@ public class MechController : MonoBehaviour
     public Animator DSAnimator;
     public Animator BDAnimator;
     public LayerMask climbableMask;
+    public DSHandler dsHandler;
 
     [Header("State")]
     public bool playerInside = false;
@@ -85,10 +86,12 @@ public class MechController : MonoBehaviour
         {
             DSAnimator.SetBool("ScreenOpen", true);
             BDAnimator.SetBool("BDOpen", true);
+            dsHandler.CamsState(false);
         } else
         {
             DSAnimator.SetBool("ScreenOpen", false);
             BDAnimator.SetBool("BDOpen", false);
+            dsHandler.CamsState(true);
         }
     }
 

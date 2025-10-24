@@ -7,11 +7,13 @@ public class DSHandler : MonoBehaviour
     private float[] currVal;
     private float[] targetVal;
     private float[] smoothAmount;
+    private bool camState = false;
+    private bool lastCamState = false;
 
     void Start(){
-        targetVal = new float[]{0.05f, 0.02f, 5f};
-        currVal = new float[]{0.05f, 0.02f, 5f};
-        smoothAmount = new float[]{20f, 120f, 20f};
+        targetVal = new float[]{0.03f, 0.02f, 3f};
+        currVal = new float[]{0.03f, 0.02f, 3f};
+        smoothAmount = new float[]{220f, 220f, 220f};
 
 
         for (int i = 0; i < screenList.Length; i++)
@@ -19,14 +21,7 @@ public class DSHandler : MonoBehaviour
     }
 
     void Update(){
-
-        if (Input.GetKeyDown(KeyCode.P))
-        {
-            currVal[0] = 1f;
-            currVal[1] = 0f;
-            currVal[2] = 5f;
-        }
-        bool needUpdate = false;
+        bool needUpdate = lastCamState != camState;
         for (int i = 0; i < targetVal.Length; i++) {
             if (Mathf.Abs(targetVal[i] - currVal[i]) > 0.01f) {
                 currVal[i] += (targetVal[i] - currVal[i]) / smoothAmount[i];
@@ -34,6 +29,7 @@ public class DSHandler : MonoBehaviour
             }
         }
         if (needUpdate) UpdateMats();
+        lastCamState = camState;
     }
 
     void UpdateMats(){
@@ -41,6 +37,27 @@ public class DSHandler : MonoBehaviour
             matList[i].SetFloat("_NoiseAmount", currVal[0]);
             matList[i].SetFloat("_AbberationAmount", currVal[1]);
             matList[i].SetFloat("_TextureShift", currVal[2]);
+            matList[i].SetInt("_ScreenOn", (camState) ? 1 : 0);
         }
+    }
+
+    System.Collections.IEnumerator ActivateCams() {
+        yield return new WaitForSeconds(2f);
+        camState = true;
+        FlashBang();
+    }
+
+    public void CamsState(bool isOn) {
+        if (isOn && camState == false) {
+            StartCoroutine(ActivateCams());
+        } else if (!isOn && camState == true) {
+            camState = false;
+        }
+    }
+
+    public void FlashBang() {
+            currVal[0] = 1f;
+            currVal[1] = 0f;
+            currVal[2] = 25f;
     }
 }

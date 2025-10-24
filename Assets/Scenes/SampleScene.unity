@@ -5569,6 +5569,7 @@ MonoBehaviour:
   climbableMask:
     serializedVersion: 2
     m_Bits: 0
+  dsHandler: {fileID: 0}
   playerInside: 0
   isControlled: 0
 --- !u!54 &1037750556
@@ -9090,6 +9091,7 @@ MonoBehaviour:
   climbableMask:
     serializedVersion: 2
     m_Bits: 1
+  dsHandler: {fileID: 1471983623}
   playerInside: 0
   isControlled: 0
 --- !u!54 &1765839745
