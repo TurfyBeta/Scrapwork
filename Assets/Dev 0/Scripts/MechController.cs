@@ -199,7 +199,7 @@ private float WallMult(Vector3 desiredMove)
     private void ZeroAccessoryPower()
     {
         AccessoryPower = new Dictionary<string, float>() {
-            { "blastDoor", 1f },
+            { "blastDoor", 0f },
             { "cockpitLights", 0f },
             { "floodLights", 0f }
         };
