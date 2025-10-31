@@ -107,7 +107,7 @@ Material:
         m_Offset: {x: 0, y: 0}
     m_Ints: []
     m_Floats:
-    - _AbberationAmount: 0.015016124
+    - _AbberationAmount: 0.02
     - _AbberationOffset: 0.02
     - _AddPrecomputedVelocity: 0
     - _AlphaClip: 0
@@ -128,7 +128,7 @@ Material:
     - _Glossiness: 0
     - _GlossyReflections: 0
     - _Metallic: 0
-    - _NoiseAmount: 0.034983907
+    - _NoiseAmount: 0.03
     - _OcclusionStrength: 1
     - _Parallax: 0.005
     - _QueueControl: 0
@@ -141,7 +141,7 @@ Material:
     - _SrcBlend: 1
     - _SrcBlendAlpha: 1
     - _Surface: 0
-    - _TextureShift: 3.0049863
+    - _TextureShift: 3
     - _WorkflowMode: 1
     - _ZWrite: 1
     m_Colors:
